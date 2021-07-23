@@ -76,7 +76,6 @@ const SongPlayer = () => {
           className={classes.thumbnail}
         />
       </Card>
-      player
       <QueuedSongList />
     </>
   );
