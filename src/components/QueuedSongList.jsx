@@ -28,7 +28,7 @@ const QueuedSongList = () => {
           QUEUE (5)
         </Typography>
         {Array.from({ length: 5 }, () => song).map((song, i) => (
-          <QueuedSong song={song} />
+          <QueuedSong key={i} song={song} />
         ))}
       </div>
     )
