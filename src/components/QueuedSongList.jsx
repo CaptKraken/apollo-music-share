@@ -10,7 +10,6 @@ import { Delete } from "@material-ui/icons";
 import { ADD_OR_REMOVE_FROM_QUEUE } from "../graphql/mutations";
 
 const QueuedSongList = ({ queue }) => {
-  console.log(queue);
   const isGreaterThanMedium = useMediaQuery((theme) =>
     theme.breakpoints.up("md")
   );

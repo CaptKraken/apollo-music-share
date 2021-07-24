@@ -107,7 +107,6 @@ const AddSong = () => {
     const { title, video_id, author } = player.getVideoData();
     const thumbnail = `http://img.youtube.com/vi/${video_id}/0.jpg`;
 
-    console.log(duration, title, author, thumbnail);
     return {
       duration,
       title,
