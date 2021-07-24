@@ -91,12 +91,6 @@ function Song({ song }) {
     });
   };
 
-  const hasQueue = Boolean(localStorage.getItem("queue"));
-  const queuedItems = JSON.parse(localStorage.getItem("queue"));
-  const isInQueue = hasQueue
-    ? queuedItems.some((qsong) => qsong.id === song.id)
-    : [];
-
   return (
     <Card className={classes.container}>
       <div className={classes.songInfoContainer}>
@@ -120,7 +114,7 @@ function Song({ song }) {
               size="small"
               color="secondary"
             >
-              {isInQueue ? <Delete /> : <Save />}
+              <Save />
             </IconButton>
           </CardActions>
         </div>
