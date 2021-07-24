@@ -3,7 +3,26 @@ import AddSong from "./components/AddSong";
 import SongList from "./components/SongList";
 import SongPlayer from "./components/SongPlayer";
 import { Grid, useMediaQuery, Hidden } from "@material-ui/core";
+import { createContext } from "react";
+import { useContext } from "react";
+import { useReducer } from "react";
+import songReducer from "./reducer";
+
+export const SongContext = createContext({
+  song: {
+    id: "48e1d4f2-458d-4bd1-83ed-96e7562f2d4f",
+    title: "Lune",
+    artist: "Moon",
+    thumbnail: "http://img.youtube.com/vi/--ZtUFsIgMk/0.jpg",
+    url: "https://www.youtube.com/watch?v=--ZtUFsIgMk",
+    duration: 228,
+  },
+  isPlaying: false,
+});
+
 function App() {
+  const initialSongState = useContext(SongContext);
+  const [state, dispatch] = useReducer(songReducer, initialSongState);
   const isGreaterThanMedium = useMediaQuery((theme) =>
     theme.breakpoints.up("md")
   );
@@ -12,7 +31,7 @@ function App() {
   );
 
   return (
-    <>
+    <SongContext.Provider value={{ state, dispatch }}>
       <Hidden only="xs">
         <Header />
       </Hidden>
@@ -50,7 +69,7 @@ function App() {
           <SongPlayer />
         </Grid>
       </Grid>
-    </>
+    </SongContext.Provider>
   );
 }
 

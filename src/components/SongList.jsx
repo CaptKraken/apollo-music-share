@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import {
   Card,
   CardMedia,
@@ -9,7 +9,12 @@ import {
   IconButton,
   makeStyles,
 } from "@material-ui/core";
-import { PlayArrow, Save } from "@material-ui/icons";
+import { Delete, Pause, PlayArrow, Save } from "@material-ui/icons";
+import { useState } from "react";
+import { useEffect } from "react";
+import { useContext } from "react";
+import { SongContext } from "../App";
+import { ADD_OR_REMOVE_FROM_QUEUE } from "../graphql/mutations";
 import { GET_SONGS } from "../graphql/queries";
 
 const useStyles = makeStyles((theme) => ({
@@ -27,15 +32,13 @@ const useStyles = makeStyles((theme) => ({
   },
   thumbnail: {
     objectFit: "cover",
-    width: 140,
-    height: 140,
+    width: 285,
+    height: 96,
   },
 }));
 
 const SongList = () => {
-  const { data, loading, error } = useQuery(GET_SONGS);
-
-  console.log(data);
+  const { data, loading, error } = useSubscription(GET_SONGS);
 
   if (loading) {
     return (
@@ -65,6 +68,34 @@ const SongList = () => {
 
 function Song({ song }) {
   const classes = useStyles();
+  const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+    onCompleted: (data) => {
+      localStorage.setItem("queue", JSON.stringify(data.addOrRemoveFromQueue));
+    },
+  });
+  const { state, dispatch } = useContext(SongContext);
+  const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
+  useEffect(() => {
+    const isSongPlaying = state.isPlaying && song.id === state.song.id;
+    setCurrentSongPlaying(isSongPlaying);
+  }, [song.id, state.song.id, state.isPlaying]);
+
+  const handleTogglePlay = () => {
+    dispatch({ type: "SET_SONG", payload: { song } });
+    dispatch(state.isPlaying ? { type: "PAUSE_SONG" } : { type: "PLAY_SONG" });
+  };
+
+  const handleAddOrRemoveFromQueue = () => {
+    addOrRemoveFromQueue({
+      variables: { input: { ...song, __typename: "Song" } },
+    });
+  };
+
+  const hasQueue = Boolean(localStorage.getItem("queue"));
+  const queuedItems = JSON.parse(localStorage.getItem("queue"));
+  const isInQueue = hasQueue
+    ? queuedItems.some((qsong) => qsong.id === song.id)
+    : [];
 
   return (
     <Card className={classes.container}>
@@ -81,11 +112,15 @@ function Song({ song }) {
           </CardContent>
 
           <CardActions>
-            <IconButton size="small" color="primary">
-              <PlayArrow />
+            <IconButton onClick={handleTogglePlay} size="small" color="primary">
+              {currentSongPlaying ? <Pause /> : <PlayArrow />}
             </IconButton>
-            <IconButton size="small" color="secondary">
-              <Save />
+            <IconButton
+              onClick={handleAddOrRemoveFromQueue}
+              size="small"
+              color="secondary"
+            >
+              {isInQueue ? <Delete /> : <Save />}
             </IconButton>
           </CardActions>
         </div>

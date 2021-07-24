@@ -1,3 +1,4 @@
+import { useMutation } from "@apollo/client";
 import {
   Avatar,
   IconButton,
@@ -6,8 +7,10 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
+import { ADD_OR_REMOVE_FROM_QUEUE } from "../graphql/mutations";
 
-const QueuedSongList = () => {
+const QueuedSongList = ({ queue }) => {
+  console.log(queue);
   const isGreaterThanMedium = useMediaQuery((theme) =>
     theme.breakpoints.up("md")
   );
@@ -25,10 +28,10 @@ const QueuedSongList = () => {
         }}
       >
         <Typography color="textSecondary" varian="button">
-          QUEUE (5)
+          QUEUE ({queue.length})
         </Typography>
-        {Array.from({ length: 5 }, () => song).map((song, i) => (
-          <QueuedSong key={i} song={song} />
+        {queue.map((song) => (
+          <QueuedSong key={song.id} song={song} />
         ))}
       </div>
     )
@@ -60,6 +63,17 @@ const useStyles = makeStyles({
 
 function QueuedSong({ song }) {
   const classes = useStyles();
+  const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+    onCompleted: (data) => {
+      localStorage.setItem("queue", JSON.stringify(data.addOrRemoveFromQueue));
+    },
+  });
+  const handleAddOrRemoveFromQueue = () => {
+    addOrRemoveFromQueue({
+      variables: { input: { ...song, __typename: "Song" } },
+    });
+  };
+
   return (
     <div className={classes.container}>
       <Avatar src={song.thumbnail} className={classes.avatar} />
@@ -75,7 +89,7 @@ function QueuedSong({ song }) {
           {song.artist}
         </Typography>
       </div>
-      <IconButton>
+      <IconButton onClick={handleAddOrRemoveFromQueue}>
         <Delete color="secondary" />
       </IconButton>
     </div>

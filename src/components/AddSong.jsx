@@ -16,6 +16,7 @@ import ReactPlayer from "react-player";
 import SoundCloudPlayer from "react-player/soundcloud";
 import YouTubePlayer from "react-player/youtube";
 import { ADD_SONG } from "../graphql/mutations";
+import { GET_SONGS } from "../graphql/queries";
 
 const useStyles = makeStyles((theme) => ({
   container: {

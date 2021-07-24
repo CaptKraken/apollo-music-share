@@ -1,3 +1,4 @@
+import { useQuery } from "@apollo/client";
 import {
   Card,
   CardContent,
@@ -7,7 +8,10 @@ import {
   Slider,
   Typography,
 } from "@material-ui/core";
-import { PlayArrow, SkipNext, SkipPrevious } from "@material-ui/icons";
+import { Pause, PlayArrow, SkipNext, SkipPrevious } from "@material-ui/icons";
+import { useContext } from "react";
+import { SongContext } from "../App";
+import { GET_QUEUED_SONGS } from "../graphql/queries";
 import QueuedSongList from "./QueuedSongList";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,7 +43,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SongPlayer = () => {
+  const { data } = useQuery(GET_QUEUED_SONGS);
+  const { state, dispatch } = useContext(SongContext);
   const classes = useStyles();
+
+  const handleTogglePlay = () => {
+    dispatch(state.isPlaying ? { type: "PAUSE_SONG" } : { type: "PLAY_SONG" });
+  };
 
   return (
     <>
@@ -47,10 +57,10 @@ const SongPlayer = () => {
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <Typography variant="h5" component="h3">
-              title
+              {state.song.title}
             </Typography>
             <Typography variant="subtitle1" component="p" color="textSecondary">
-              artist
+              {state.song.artist}
             </Typography>
           </CardContent>
 
@@ -58,25 +68,26 @@ const SongPlayer = () => {
             <IconButton>
               <SkipPrevious />
             </IconButton>
-            <IconButton>
-              <PlayArrow className={classes.playIcon} />
+            <IconButton onClick={handleTogglePlay}>
+              {state.isPlaying ? (
+                <Pause className={classes.playIcon} />
+              ) : (
+                <PlayArrow className={classes.playIcon} />
+              )}
             </IconButton>
             <IconButton>
               <SkipNext />
             </IconButton>
             <Typography variant="subtitle1" component="p" color="textSecondary">
-              00:01:30
+              {state.song.duration}
             </Typography>
           </div>
           <Slider type="range" min={0} max={1} step={0.01} />
         </div>
 
-        <CardMedia
-          image="http://img.youtube.com/vi/--ZtUFsIgMk/0.jpg"
-          className={classes.thumbnail}
-        />
+        <CardMedia image={state.song.thumbnail} className={classes.thumbnail} />
       </Card>
-      <QueuedSongList />
+      <QueuedSongList queue={data?.queue} />
     </>
   );
 };
